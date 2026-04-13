@@ -46,11 +46,22 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <header className="mb-8 flex items-center justify-between">
-            <h1 className="text-2xl font-extrabold text-[#000666]">Bienvenido de vuelta, Guerrero</h1>
-            <div className="w-10 h-10 rounded-full bg-[#1a237e] text-white flex items-center justify-center font-bold">
+        <header className="mb-8 p-6 bg-gradient-to-r from-[#000666] to-[#1a237e] rounded-2xl text-white shadow-md relative overflow-hidden flex items-start justify-between">
+          <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+            <Award className="w-48 h-48 -mr-10 -mt-10" />
+          </div>
+          <div className="relative z-10 w-full flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">Bienvenido de vuelta, Guerrero</h1>
+              <p className="text-[#a0c4ff] max-w-xl text-lg font-medium leading-relaxed">
+                El verdadero talento es la suma de horas de disciplina. ¡Hoy somos mejores que ayer! Sigue brillando en la pista de baile.
+              </p>
+            </div>
+            
+            <div className="w-12 h-12 rounded-full bg-white text-[#000666] flex items-center justify-center font-bold text-xl shadow-inner shrink-0 ml-4 hidden sm:flex border-2 border-[#a0c4ff]">
                 A
             </div>
+          </div>
         </header>
         {children}
       </main>

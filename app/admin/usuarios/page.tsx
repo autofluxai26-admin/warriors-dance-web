@@ -18,6 +18,13 @@ export default function UsuariosPage() {
   const [password, setPassword] = useState('');
   const [rol, setRol] = useState('estudiante');
 
+  // Modal State para Cambiar Contraseña
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [updatePasswordError, setUpdatePasswordError] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [newPassword, setNewPassword] = useState('');
+
   const fetchUsuarios = async () => {
     setLoading(true);
     // Fetch profiles
@@ -49,7 +56,7 @@ export default function UsuariosPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No estás autenticado');
 
-      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/create_user`;
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_users`;
       
       const response = await fetch(url, {
         method: 'POST',
@@ -58,6 +65,7 @@ export default function UsuariosPage() {
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
+          action: 'CREATE_USER',
           email,
           password,
           full_name: nombre,
@@ -82,6 +90,47 @@ export default function UsuariosPage() {
       setCreateError(err.message);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdatePasswordError('');
+    setIsUpdatingPassword(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No estás autenticado');
+
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_users`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          action: 'UPDATE_PASSWORD',
+          target_user_id: selectedUser.id,
+          new_password: newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al cambiar contraseña');
+      }
+
+      // Éxito:
+      setIsPasswordModalOpen(false);
+      setNewPassword('');
+      setSelectedUser(null);
+    } catch (err: any) {
+      setUpdatePasswordError(err.message);
+    } finally {
+      setIsUpdatingPassword(true);
     }
   };
 
@@ -158,9 +207,20 @@ export default function UsuariosPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            setSelectedUser(usr);
+                            setIsPasswordModalOpen(true);
+                          }}
+                          className="px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                        >
+                          Clave
+                        </button>
+                        <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -207,7 +267,7 @@ export default function UsuariosPage() {
               <p className="text-sm text-slate-500 mb-6">Ingresa los datos para registrar un profesor o estudiante.</p>
               
               {createError && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 font-medium">
                   {createError}
                 </div>
               )}
@@ -233,7 +293,7 @@ export default function UsuariosPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 outline-none"
-                    placeholder="correo@ejemplo.com"
+                    placeholder="correo@warriorsdance.site"
                   />
                 </div>
                 <div>
@@ -291,6 +351,63 @@ export default function UsuariosPage() {
                   >
                     {isCreating && <Loader2 className="w-4 h-4 animate-spin" />}
                     Crear Cuenta
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CAMBIAR CONTRASEÑA */}
+      {isPasswordModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setIsPasswordModalOpen(false)}
+              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-1">Cambiar Contraseña</h3>
+              <p className="text-sm text-slate-500 mb-6">Establece una nueva clave para <b>{selectedUser.full_name}</b>.</p>
+              
+              {updatePasswordError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 font-medium">
+                  {updatePasswordError}
+                </div>
+              )}
+
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-800 outline-none"
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                </div>
+                
+                <div className="pt-4 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordModalOpen(false)}
+                    className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingPassword}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-amber-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isUpdatingPassword && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Guardar
                   </button>
                 </div>
               </form>

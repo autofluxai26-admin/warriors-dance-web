@@ -51,12 +51,24 @@ export default function ProfesorDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Banner Motivacional */}
+      <div className="bg-gradient-to-r from-indigo-900 to-indigo-700 rounded-2xl p-6 md:p-8 text-white shadow-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+          <BookOpen className="w-48 h-48 -mr-10 -mt-10" />
+        </div>
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">¡Hola, Profesor!</h2>
+        <p className="text-indigo-100 max-w-2xl text-lg font-medium">Guiando a la próxima generación de campeones. ¡Tu esfuerzo y dedicación de hoy se convertirán en sus medallas del mañana!</p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Mis Alumnos</h2>
-              <p className="text-slate-500 text-sm mt-1">Directorio exclusivo filtrado por tus materias asignadas.</p>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-indigo-500" />
+                Mis Alumnos
+              </h2>
+              <p className="text-slate-500 text-sm mt-1">Directorio de estudiantes inscritos en tus materias asignadas.</p>
             </div>
             
             <div className="relative">
