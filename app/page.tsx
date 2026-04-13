@@ -121,7 +121,7 @@ export default function Home() {
                <div className="w-full lg:w-1/2 relative">
                   <div className="aspect-square max-w-md mx-auto rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(37,99,235,0.2)] bg-slate-100 relative">
                      {/* Imagen ilustrativa nosotros */}
-                     <Image src="/images/logros/real1.jpeg" alt="Escuela de Danza" fill className="object-cover" />
+                     <Image src="/images/logros/trofeos.jpg" alt="Escuela de Danza" fill className="object-cover" />
                      <div className="absolute inset-0 bg-blue-600/10 mix-blend-multiply" />
                   </div>
                   <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-blue-100 rounded-full blur-3xl -z-10" />
