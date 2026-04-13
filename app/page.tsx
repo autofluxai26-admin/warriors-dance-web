@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Calendar, ChevronRight, Play, Trophy, ArrowRight, User, Instagram } from 'lucide-react';
+import { Calendar, ChevronRight, Play, Trophy, ArrowRight, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
   
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
   // Form State
   const [formData, setFormData] = useState({
     nombres: '',
@@ -68,22 +70,35 @@ export default function Home() {
             <a href="#logros" className="hover:text-blue-600 transition-colors">LOGROS</a>
             <a href="#inscripcion" className="hover:text-blue-600 transition-colors">INSCRIPCIÓN</a>
           </nav>
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="relative group hidden md:block">
-              <button className="flex items-center gap-2 text-blue-600 font-bold text-sm tracking-wide hover:text-blue-800 transition-all py-2">
-                <User className="w-4 h-4" /> Acceso a Perfil
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="relative group">
+              <button 
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                onBlur={() => setTimeout(() => setIsProfileMenuOpen(false), 200)}
+                className="flex items-center justify-center gap-1.5 md:gap-2 text-blue-600 font-bold text-sm md:text-sm tracking-wide hover:text-blue-800 transition-all py-2 px-1"
+              >
+                <div className="bg-blue-100 p-1.5 rounded-full md:bg-transparent md:p-0">
+                  <User className="w-5 h-5 md:w-4 md:h-4" />
+                </div>
+                <span className="hidden sm:inline">Acceso a Perfil</span>
+                <span className="inline sm:hidden">Perfil</span>
               </button>
-              <div className="absolute top-full right-0 mt-1 w-52 bg-white border border-slate-100 rounded-xl shadow-[0_10px_40px_rgba(37,99,235,0.15)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
-                <Link href="/login?role=estudiante" className="block px-4 py-3 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border-b border-slate-50">
+              <div 
+                className={`absolute top-full right-0 mt-2 w-56 bg-white border border-slate-100 rounded-xl shadow-[0_10px_40px_rgba(37,99,235,0.15)] transition-all duration-200 overflow-hidden z-[100] ${isProfileMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'} md:group-hover:opacity-100 md:group-hover:visible md:group-hover:translate-y-0`}
+              >
+                <Link href="/login?role=estudiante" className="block px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border-b border-slate-50">
                   Panel de Estudiantes
                 </Link>
-                <Link href="/login?role=profesor" className="block px-4 py-3 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                <Link href="/login?role=profesor" className="block px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                   Panel Profesor / Admin
                 </Link>
               </div>
             </div>
-            <a href="#inscripcion" className="items-center gap-2 bg-blue-600 text-white px-5 xl:px-6 py-2.5 rounded-full font-bold text-sm shadow-[0_4px_20px_rgba(37,99,235,0.4)] hover:shadow-[0_4px_25px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all flex">
+            <a href="#inscripcion" className="hidden sm:flex items-center gap-2 bg-blue-600 text-white px-5 xl:px-6 py-2.5 rounded-full font-bold text-sm shadow-[0_4px_20px_rgba(37,99,235,0.4)] hover:shadow-[0_4px_25px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all">
               Matricularse <ArrowRight className="w-4 h-4" />
+            </a>
+            <a href="#inscripcion" className="flex sm:hidden items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-full font-bold text-xs shadow-md active:bg-blue-700">
+              Registrarse
             </a>
           </div>
         </div>
@@ -409,7 +424,11 @@ export default function Home() {
                  rel="noopener noreferrer"
                  className="flex items-center gap-2 text-slate-400 hover:text-[#E1306C] transition-colors bg-white/5 border border-white/10 px-4 py-2 rounded-full font-bold text-sm"
                >
-                 <Instagram className="w-5 h-5" />
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                 </svg>
                  @warriorsdance.ec
                </a>
             </div>
