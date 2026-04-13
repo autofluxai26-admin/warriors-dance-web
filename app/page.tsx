@@ -69,9 +69,19 @@ export default function Home() {
             <a href="#inscripcion" className="hover:text-blue-600 transition-colors">INSCRIPCIÓN</a>
           </nav>
           <div className="flex items-center gap-3 md:gap-4">
-            <Link href="/dashboard" className="hidden md:flex items-center gap-2 text-blue-600 font-bold text-sm tracking-wide hover:text-blue-800 transition-all">
-              <User className="w-4 h-4" /> Student Login
-            </Link>
+            <div className="relative group hidden md:block">
+              <button className="flex items-center gap-2 text-blue-600 font-bold text-sm tracking-wide hover:text-blue-800 transition-all py-2">
+                <User className="w-4 h-4" /> Acceso a Perfil
+              </button>
+              <div className="absolute top-full right-0 mt-1 w-52 bg-white border border-slate-100 rounded-xl shadow-[0_10px_40px_rgba(37,99,235,0.15)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                <Link href="/login?role=estudiante" className="block px-4 py-3 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border-b border-slate-50">
+                  Panel de Estudiantes
+                </Link>
+                <Link href="/login?role=profesor" className="block px-4 py-3 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                  Panel Profesor / Admin
+                </Link>
+              </div>
+            </div>
             <a href="#inscripcion" className="items-center gap-2 bg-blue-600 text-white px-5 xl:px-6 py-2.5 rounded-full font-bold text-sm shadow-[0_4px_20px_rgba(37,99,235,0.4)] hover:shadow-[0_4px_25px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all flex">
               Matricularse <ArrowRight className="w-4 h-4" />
             </a>
@@ -111,8 +121,8 @@ export default function Home() {
                <div className="w-full lg:w-1/2 relative">
                   <div className="aspect-square max-w-md mx-auto rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(37,99,235,0.2)] bg-slate-100 relative">
                      {/* Imagen ilustrativa nosotros */}
-                     <Image src="/images/logros/logro4.jpg" alt="Escuela de Danza" fill className="object-cover" />
-                     <div className="absolute inset-0 bg-blue-600/10mix-blend-multiply" />
+                     <Image src="/images/logros/real1.jpeg" alt="Escuela de Danza" fill className="object-cover" />
+                     <div className="absolute inset-0 bg-blue-600/10 mix-blend-multiply" />
                   </div>
                   <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-blue-100 rounded-full blur-3xl -z-10" />
                </div>

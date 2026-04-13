@@ -1,94 +1,146 @@
-import { Users, Clock, FileText, PlusCircle, Calendar as CalendarIcon, Check, Edit3 } from "lucide-react";
+'use client';
 
-export default function ProfesorPage() {
-  const todaysClasses = [
-    { title: "Contemporáneo - Nivel Intermedio", time: "18:00 - 19:30", room: "Sala A", students: 15, status: "Próxima" },
-    { title: "Acondicionamiento Físico", time: "19:30 - 20:30", room: "Gimnasio", students: 22, status: "Programada" }
-  ];
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Search, Loader2, BookOpen, AlertCircle } from 'lucide-react';
+
+export default function ProfesorDashboard() {
+  const [estudiantes, setEstudiantes] = useState<any[]>([]);
+  const [misMaterias, setMisMaterias] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const fetchDatos = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Obtenemos materias
+        const { data: materias } = await supabase
+          .from('teacher_subjects')
+          .select('subject')
+          .eq('teacher_id', session.user.id);
+          
+        if (materias) {
+          setMisMaterias(materias.map(m => m.subject));
+        }
+
+        // Obtener estudiantes. 
+        // Supabase filtrará MÁGICAMENTE los datos gracias a las políticas RLS. 
+        // El profesor solo verá alumnos asignados a sus materias.
+        const { data: alumnos } = await supabase
+          .from('estudiantes_data')
+          .select('*')
+          .order('nombres', { ascending: true });
+          
+        if (alumnos) {
+          setEstudiantes(alumnos);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchDatos();
+  }, []);
+
+  const filteredEstudiantes = estudiantes.filter(est => 
+    est.nombres.toLowerCase().includes(search.toLowerCase()) || 
+    est.apellidos.toLowerCase().includes(search.toLowerCase()) ||
+    est.curso_asignado.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="space-y-8">
-      {/* Summary Cards */}
+    <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-[#e0e3e5] flex items-center gap-4">
-            <div className="p-4 bg-[#e0e0ff] text-[#1a237e] rounded-2xl">
-               <CalendarIcon className="w-8 h-8" />
-            </div>
+        <div className="md:col-span-2 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-               <p className="text-[#767683] text-sm font-semibold">Clases de Hoy</p>
-               <h3 className="text-3xl font-black text-[#191c1e]">2</h3>
-            </div>
-         </div>
-         <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-[#e0e3e5] flex items-center gap-4">
-            <div className="p-4 bg-[#fff8e1] text-[#ffb300] rounded-2xl">
-               <Users className="w-8 h-8" />
-            </div>
-            <div>
-               <p className="text-[#767683] text-sm font-semibold">Alumnos Activos</p>
-               <h3 className="text-3xl font-black text-[#191c1e]">37</h3>
-            </div>
-         </div>
-         <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-[#e0e3e5] flex items-center gap-4">
-            <div className="p-4 bg-[#e6f4ea] text-[#137333] rounded-2xl">
-               <FileText className="w-8 h-8" />
-            </div>
-            <div>
-               <p className="text-[#767683] text-sm font-semibold">Feedbacks Enviados</p>
-               <h3 className="text-3xl font-black text-[#191c1e]">12</h3>
-            </div>
-         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-         {/* Mis Clases de Hoy */}
-         <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between mb-4">
-               <h2 className="text-xl font-bold text-[#1a237e]">Horario del Día</h2>
-               <button className="text-sm font-bold text-[#2b5bb5] hover:text-[#1a237e] flex items-center gap-1">
-                  Ver semana completa
-               </button>
+              <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Mis Alumnos</h2>
+              <p className="text-slate-500 text-sm mt-1">Directorio exclusivo filtrado por tus materias asignadas.</p>
             </div>
             
-            <div className="space-y-4">
-               {todaysClasses.map((cl, i) => (
-                  <div key={i} className="bg-white rounded-3xl p-6 shadow-sm border border-[#e0e3e5] hover:border-[#1a237e] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
-                     <div>
-                        <h3 className="font-bold text-[#191c1e] text-lg mb-2">{cl.title}</h3>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-[#454652] font-medium">
-                           <span className="flex items-center gap-1.5 bg-[#f2f4f6] px-3 py-1.5 rounded-lg"><Clock className="w-4 h-4 text-[#767683]" /> {cl.time}</span>
-                           <span className="flex items-center gap-1.5 bg-[#f2f4f6] px-3 py-1.5 rounded-lg"><Users className="w-4 h-4 text-[#767683]" /> {cl.students} Alumnos</span>
-                        </div>
-                     </div>
-                     <div className="flex flex-col gap-2 min-w-[200px]">
-                        <button className="w-full bg-[#1a237e] text-white font-bold py-3 rounded-xl shadow-md hover:bg-[#000666] transition-colors text-sm flex items-center justify-center gap-2">
-                           <Check className="w-4 h-4" /> Registrar Asistencia
-                        </button>
-                     </div>
-                  </div>
-               ))}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <input 
+                type="text" 
+                placeholder="Buscar alumno..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64 bg-white shadow-sm"
+              />
             </div>
-         </div>
+          </div>
 
-         {/* Acciones Rápidas */}
-         <div className="space-y-6">
-            <h2 className="text-xl font-bold text-[#1a237e] mb-4">Acciones Docentes</h2>
-            
-            <button className="w-full bg-white rounded-3xl p-6 shadow-sm border border-[#e0e3e5] hover:border-[#2b5bb5] hover:shadow-md transition-all text-left group">
-               <div className="w-12 h-12 bg-[#e0e0ff] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Edit3 className="w-6 h-6 text-[#2b5bb5]" />
-               </div>
-               <h4 className="font-bold text-[#191c1e] mb-1">Redactar Evaluación</h4>
-               <p className="text-sm text-[#767683]">Envía comentarios individuales del rendimiento a tus alumnos.</p>
-            </button>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4">Estudiante</th>
+                    <th className="px-6 py-4">Asignatura</th>
+                    <th className="px-6 py-4">Edad</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-12 text-center">
+                        <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mx-auto" />
+                      </td>
+                    </tr>
+                  ) : filteredEstudiantes.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
+                        {misMaterias.length === 0 
+                          ? 'No tienes materias asignadas todavía. Pide a Administración que te asigne tus horarios.'
+                          : 'No se encontraron estudiantes para tus asignaturas.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredEstudiantes.map((est) => (
+                      <tr key={est.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-6 py-4 font-bold text-slate-800">
+                          {est.nombres} {est.apellidos}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            {est.curso_asignado}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 font-medium text-slate-600">
+                          {est.edad} años
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-            <button className="w-full bg-white rounded-3xl p-6 shadow-sm border border-[#e0e3e5] hover:border-[#137333] hover:shadow-md transition-all text-left group">
-               <div className="w-12 h-12 bg-[#e6f4ea] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <PlusCircle className="w-6 h-6 text-[#137333]" />
-               </div>
-               <h4 className="font-bold text-[#191c1e] mb-1">Subir Material Didáctico</h4>
-               <p className="text-sm text-[#767683]">Comparte pistas de audio o videos de coreografía para que repasen.</p>
-            </button>
-         </div>
+        {/* Info lateral */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm h-fit">
+          <h3 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-4">Asignaturas a Cargo</h3>
+          
+          {loading ? (
+             <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
+          ) : misMaterias.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {misMaterias.map(m => (
+                <span key={m} className="bg-slate-100 text-slate-700 font-bold border border-slate-200 px-3 py-1.5 rounded-lg text-sm">
+                  {m}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-amber-50 border border-amber-100 text-amber-800 p-4 rounded-xl text-sm flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <p>Tu perfil aún no tiene materias vinculadas.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

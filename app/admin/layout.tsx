@@ -3,16 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2, LogOut, BookOpen, GraduationCap } from 'lucide-react';
+import { Loader2, LogOut, Users, Settings, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ProfesorLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const checkProfesor = async () => {
+    const checkAdmin = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -26,8 +26,7 @@ export default function ProfesorLayout({ children }: { children: React.ReactNode
         .eq('id', session.user.id)
         .single();
 
-      // Permitimos acceso a profesores y también a admins (para que Steven pueda probarlo)
-      if (!profile || (profile.role !== 'profesor' && profile.role !== 'admin')) {
+      if (!profile || profile.role !== 'admin') {
         router.push('/login?role=profesor');
         return;
       }
@@ -36,7 +35,7 @@ export default function ProfesorLayout({ children }: { children: React.ReactNode
       setLoading(false);
     };
 
-    checkProfesor();
+    checkAdmin();
   }, [router]);
 
   const handleLogout = async () => {
@@ -55,25 +54,29 @@ export default function ProfesorLayout({ children }: { children: React.ReactNode
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-indigo-950 text-indigo-100 flex flex-col">
-        <div className="h-20 flex items-center px-6 border-b border-indigo-900/50">
-          <BookOpen className="w-6 h-6 text-indigo-400 mr-3" />
-          <span className="font-bold text-white text-lg tracking-wide">Portal Docente</span>
+      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col">
+        <div className="h-20 flex items-center px-6 border-b border-slate-800">
+          <ShieldCheck className="w-6 h-6 text-blue-500 mr-3" />
+          <span className="font-bold text-white text-lg tracking-wide">Admin Pannel</span>
         </div>
         
         <div className="flex-1 py-8 flex flex-col gap-2 px-4">
-          <Link href="/profesor" className="flex items-center gap-3 px-4 py-3 bg-indigo-600/20 text-indigo-300 rounded-xl font-medium transition-colors">
-            <GraduationCap className="w-5 h-5" />
-            Mis Alumnos
+          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 bg-blue-600/10 text-blue-500 rounded-xl font-medium transition-colors">
+            <Users className="w-5 h-5" />
+            Estudiantes
+          </Link>
+          <Link href="/admin/usuarios" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-800 rounded-xl font-medium transition-colors">
+            <Settings className="w-5 h-5" />
+            Usuarios y Roles
           </Link>
         </div>
 
-        <div className="p-4 border-t border-indigo-900/50">
+        <div className="p-4 border-t border-slate-800">
           <div className="px-4 py-3 mb-4">
             <p className="text-sm font-semibold text-white">{profile.full_name}</p>
-            <p className="text-xs text-indigo-400 capitalize">{profile.role}</p>
+            <p className="text-xs text-slate-500 capitalize">{profile.role}</p>
           </div>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-300 hover:bg-red-500/10 rounded-xl font-medium transition-colors">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl font-medium transition-colors">
             <LogOut className="w-5 h-5" />
             Cerrar Sesión
           </button>
@@ -82,13 +85,8 @@ export default function ProfesorLayout({ children }: { children: React.ReactNode
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8 shadow-sm justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Muro de Asignaturas</h1>
-          {profile.role === 'admin' && (
-            <span className="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full font-bold border border-amber-200">
-              Modo Simulador Admin
-            </span>
-          )}
+        <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8 shadow-sm">
+          <h1 className="text-xl font-bold text-slate-800">Panel de Control - Warriors Dance</h1>
         </header>
         <div className="p-8 flex-1 overflow-auto">
           {children}
