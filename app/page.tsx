@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Calendar, ChevronRight, Play, Trophy, ArrowRight, User } from 'lucide-react';
+import { Calendar, ChevronRight, Play, Trophy, ArrowRight, User, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -398,9 +398,20 @@ export default function Home() {
                  <span className="text-xs text-blue-400 font-semibold tracking-wider uppercase">Escuela de Danza</span>
                </div>
             </div>
-            <div className="text-sm font-medium text-center md:text-right">
-               <p className="mb-2">Diseñado para la formación artística de alto nivel.</p>
-               <p>&copy; 2026 Warriors Dance. Todos los derechos reservados.</p>
+            <div className="flex flex-col items-center md:items-end gap-4 mt-8 md:mt-0">
+               <div className="text-sm font-medium text-center md:text-right">
+                  <p className="mb-2">Diseñado para la formación artística de alto nivel.</p>
+                  <p>&copy; 2026 Warriors Dance. Todos los derechos reservados.</p>
+               </div>
+               <a 
+                 href="https://www.instagram.com/warriorsdance.ec/" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="flex items-center gap-2 text-slate-400 hover:text-[#E1306C] transition-colors bg-white/5 border border-white/10 px-4 py-2 rounded-full font-bold text-sm"
+               >
+                 <Instagram className="w-5 h-5" />
+                 @warriorsdance.ec
+               </a>
             </div>
          </div>
       </footer>

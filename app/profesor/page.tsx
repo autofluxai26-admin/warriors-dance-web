@@ -9,12 +9,24 @@ export default function ProfesorDashboard() {
   const [misMaterias, setMisMaterias] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [profesorNombre, setProfesorNombre] = useState('Profesor');
 
   useEffect(() => {
     const fetchDatos = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
+        // Obtenemos perfil para el nombre
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (profile?.full_name) {
+          setProfesorNombre(profile.full_name.split(' ')[0]);
+        }
+
         // Obtenemos materias
         const { data: materias } = await supabase
           .from('teacher_subjects')
@@ -56,7 +68,7 @@ export default function ProfesorDashboard() {
         <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
           <BookOpen className="w-48 h-48 -mr-10 -mt-10" />
         </div>
-        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">¡Hola, Profesor!</h2>
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">¡Hola, {profesorNombre}!</h2>
         <p className="text-indigo-100 max-w-2xl text-lg font-medium">Guiando a la próxima generación de campeones. ¡Tu esfuerzo y dedicación de hoy se convertirán en sus medallas del mañana!</p>
       </div>
 

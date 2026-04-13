@@ -25,6 +25,12 @@ export default function UsuariosPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [newPassword, setNewPassword] = useState('');
 
+  // Modal State para Asignar Materia
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [assignError, setAssignError] = useState('');
+  const [assignSubject, setAssignSubject] = useState('');
+
   const fetchUsuarios = async () => {
     setLoading(true);
     // Fetch profiles
@@ -130,7 +136,36 @@ export default function UsuariosPage() {
     } catch (err: any) {
       setUpdatePasswordError(err.message);
     } finally {
-      setIsUpdatingPassword(true);
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleAssignSubject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAssignError('');
+    setIsAssigning(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No estás autenticado');
+
+      const { error } = await supabase
+        .from('teacher_subjects')
+        .insert({
+          teacher_id: selectedUser.id,
+          subject: assignSubject
+        });
+
+      if (error) throw error;
+
+      setIsAssignModalOpen(false);
+      setAssignSubject('');
+      setSelectedUser(null);
+      await fetchUsuarios(); // Recargar usuarios
+    } catch (err: any) {
+      setAssignError(err.message);
+    } finally {
+      setIsAssigning(false);
     }
   };
 
@@ -198,7 +233,13 @@ export default function UsuariosPage() {
                               {mat}
                             </span>
                           ))}
-                          <button className="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded transition-colors border border-blue-200">
+                          <button 
+                            onClick={() => {
+                              setSelectedUser(usr);
+                              setIsAssignModalOpen(true);
+                            }}
+                            className="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded transition-colors border border-blue-200"
+                          >
                             + ASIGNAR
                           </button>
                         </div>
@@ -408,6 +449,62 @@ export default function UsuariosPage() {
                   >
                     {isUpdatingPassword && <Loader2 className="w-4 h-4 animate-spin" />}
                     Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ASIGNAR MATERIA */}
+      {isAssignModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setIsAssignModalOpen(false)}
+              className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-1">Asignar Materia</h3>
+              <p className="text-sm text-slate-500 mb-6">Añade una asignatura para <b>{selectedUser.full_name}</b>.</p>
+              
+              {assignError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 font-medium">
+                  {assignError}
+                </div>
+              )}
+
+              <form onSubmit={handleAssignSubject} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Nombre de la Asignatura</label>
+                  <input
+                    type="text"
+                    required
+                    value={assignSubject}
+                    onChange={(e) => setAssignSubject(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 outline-none"
+                    placeholder="Ej. Salsa, Bachata, Ballet"
+                  />
+                </div>
+                
+                <div className="pt-4 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsAssignModalOpen(false)}
+                    className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isAssigning}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isAssigning && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Asignar
                   </button>
                 </div>
               </form>

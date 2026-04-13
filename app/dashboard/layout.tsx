@@ -1,11 +1,63 @@
+'use client';
+
 import Link from "next/link";
-import { LayoutDashboard, Calendar, MessageSquare, Award, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { LayoutDashboard, Calendar, MessageSquare, Award, LogOut, Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const checkEstudiante = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/login?role=estudiante');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile || (profile.role !== 'estudiante' && profile.role !== 'admin')) {
+        router.push('/login?role=estudiante');
+        return;
+      }
+
+      setProfile(profile);
+      setLoading(false);
+    };
+
+    checkEstudiante();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f2f4f6]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#000666]" />
+      </div>
+    );
+  }
+
+  const firstName = profile?.full_name?.split(' ')[0] || 'Guerrero';
+  const initial = firstName.charAt(0).toUpperCase();
+
   return (
     <div className="min-h-screen bg-[#f2f4f6] flex text-[#191c1e]">
       {/* Sidebar */}
@@ -37,7 +89,7 @@ export default function DashboardLayout({
         </nav>
         
         <div className="p-4 border-t border-[#e0e3e5]">
-           <button className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white bg-[#191c1e] hover:bg-[#2d3133] transition-colors font-semibold">
+           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white bg-[#191c1e] hover:bg-[#2d3133] transition-colors font-semibold">
               <LogOut className="w-4 h-4" />
               Cerrar Sesión
            </button>
@@ -52,14 +104,14 @@ export default function DashboardLayout({
           </div>
           <div className="relative z-10 w-full flex items-center justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">Bienvenido de vuelta, Guerrero</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">Bienvenido de vuelta, {firstName}</h1>
               <p className="text-[#a0c4ff] max-w-xl text-lg font-medium leading-relaxed">
                 El verdadero talento es la suma de horas de disciplina. ¡Hoy somos mejores que ayer! Sigue brillando en la pista de baile.
               </p>
             </div>
             
             <div className="w-12 h-12 rounded-full bg-white text-[#000666] flex items-center justify-center font-bold text-xl shadow-inner shrink-0 ml-4 hidden sm:flex border-2 border-[#a0c4ff]">
-                A
+                {initial}
             </div>
           </div>
         </header>
